@@ -51,9 +51,9 @@ export const constantRoutes = [
       path: 'dashboard',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      meta: { title: '首页', icon: 'dashboard' }
     }]
-  }
+  },
 
   // {
   //   path: '/example',
@@ -76,19 +76,19 @@ export const constantRoutes = [
   //     }
   //   ]
   // },
-  //
-  // {
-  //   path: '/form',
-  //   component: Layout,
-  //   children: [
-  //     {
-  //       path: 'index',
-  //       name: 'Form',
-  //       component: () => import('@/views/form/index'),
-  //       meta: { title: 'Form', icon: 'form' }
-  //     }
-  //   ]
-  // }
+
+  {
+    path: '/form',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Form',
+        component: () => import('@/views/form/index'),
+        meta: { title: '表单', icon: 'form' }
+      }
+    ]
+  }
 ]
 
 /**
@@ -150,6 +150,30 @@ export const asyncRoutes = [
         path: 'menu2',
         component: () => import('@/views/nested/menu2/index'),
         meta: { title: 'menu2' }
+      }
+    ]
+  },
+  {
+    path: '/code',
+    component: Layout,
+    redirect: '/code/java',
+    name: 'Code',
+    meta: {
+      title: '代码生成',
+      icon: 'form'
+    },
+    children: [
+      {
+        path: 'java',
+        name: 'Java',
+        component: () => import('@/views/code/CodeJava'),
+        meta: { title: 'Java代码生成', icon: 'form' }
+      },
+      {
+        path: 'sql',
+        name: 'Sql',
+        component: () => import('@/views/code/CodeSql'),
+        meta: { title: 'Sql脚本生成', icon: 'form' }
       }
     ]
   },
