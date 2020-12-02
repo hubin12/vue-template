@@ -8,10 +8,26 @@ export function generatorSql(data) {
   })
 }
 
-export function download(param) {
+export function generatorJava(data) {
   return request({
-    url: '/api/download',
-    method: 'get',
-    param: param
+    url: '/api/generatorJava',
+    method: 'post',
+    data
+  })
+}
+
+export function listTables(data) {
+  return request({
+    url: '/api/listTables',
+    method: 'post',
+    data
+  })
+}
+
+export function listDataBases(data) {
+  return request({
+    url: '/api/listDataBases',
+    method: 'post',
+    data
   })
 }

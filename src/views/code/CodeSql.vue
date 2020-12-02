@@ -1,19 +1,29 @@
 <template>
   <div class="app-container">
-    <el-form ref="form" :model="form" label-width="120px">
-      <el-form-item label="生成表的名称">
+    <el-form ref="form" :model="form" :rules="rules"  label-width="120px">
+      <el-form-item label="生成表的名称" prop="tableName">
         <el-input v-model="form.tableName"  placeholder="输入生成表的名称"/>
       </el-form-item>
       <span style="font-size: 8px; color: red; margin-left: 120px; font-style: italic;">*暂只支持Mysql</span>
-      <el-form-item label="选择数据库">
+      <el-form-item label="选择数据库类型" prop="databaseType">
         <el-select v-model="form.databaseType" placeholder="选择数据库类型">
           <el-option label="Mysql" value="MySql" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="选择数据库" prop="databaseName">
+        <el-select v-model="form.databaseName" placeholder="选择数据库">
+          <el-option
+            v-for='item in dataBaseData'
+            :key="item"
+            :label="item"
+            :value="item">
+          </el-option>
         </el-select>
       </el-form-item>
       <el-form-item>
         <el-button @click="addField" type="primary">添加字段</el-button>
       </el-form-item>
-      <el-form-item>
+      <el-form-item prop="fields">
         <el-table
           v-if="form.fields.length > 0"
           stripe
@@ -49,14 +59,14 @@
             align="center"
             prop="fieldCanBeNull"
             label="是否可以为空"
-            :formatter="formatteData"
+            :formatter="formatterData"
             width="140">
           </el-table-column>
           <el-table-column
             align="center"
             prop="fieldIsKey"
             label="是否为主键"
-            :formatter="formatteData"
+            :formatter="formatterData"
             width="140">
           </el-table-column>
           <el-table-column
@@ -76,7 +86,7 @@
         </el-table>
       </el-form-item>
       <el-dialog title="添加字段" :visible.sync="showAddDialog" width="40%" @close="closeAddDialog">
-        <el-form ref="fieldForm" :model="field">
+        <el-form ref="fieldForm" :model="field" :rules="rules">
           <el-form-item
             label='字段名称:'
             prop="fieldName">
@@ -174,7 +184,7 @@
 </template>
 
 <script>
-import { download, generatorSql } from '@/api/code'
+import { generatorSql, listDataBases } from '@/api/code'
 import axios from 'axios'
 
 export default {
@@ -183,8 +193,10 @@ export default {
       form: {
         tableName: '',
         databaseType: '',
+        databaseName: '',
         fields: []
       },
+      dataBaseData: [],
       field: {
         fieldName: '',
         fieldType: '',
@@ -194,13 +206,52 @@ export default {
         fieldIsKey: '',
         fieldDescription: ''
       },
-      showAddDialog: false
+      showAddDialog: false,
+      rules: {
+        tableName: [
+          { required: true, message: '请输入表名称', trigger: 'blur' }
+        ],
+        databaseType: [
+          { required: true, message: '请选择数据库类型', trigger: 'change' }
+        ],
+        databaseName: [
+          { required: true, message: '请选择数据库', trigger: 'change' }
+        ],
+        fieldName: [
+          { required: true, message: '请输入字段名称', trigger: 'blur' }
+        ],
+        fieldType: [
+          { required: true, message: '请选择字段类型', trigger: 'change' }
+        ],
+        fieldLength: [
+          { required: true, message: '请输入字段长度', trigger: 'blur' }
+        ],
+        fieldDecimalLength: [
+          { required: true, message: '请输入小数点长度', trigger: 'blur' }
+        ],
+        fieldCanBeNull: [
+          { required: true, message: '请选择是否可以为空', trigger: 'change' }
+        ],
+        fieldIsKey: [
+          { required: true, message: '请选择是否为主键', trigger: 'change' }
+        ],
+        fieldDescription: [
+          { required: true, message: '请输入字段注释', trigger: 'blur' }
+        ]
+      }
     }
   },
   created() {
+    listDataBases({}).then(res => {
+      if (res.code === 200) {
+        this.dataBaseData = res.data
+      } else {
+        this.$message.error('获取数据库列表失败！')
+      }
+    })
   },
   methods: {
-    formatteData(row, column, cellValue) {
+    formatterData(row, column, cellValue) {
       if (cellValue.indexOf(1) !== -1) {
         return '是'
       } else {
@@ -208,16 +259,22 @@ export default {
       }
     },
     submit() {
-      const data = {}
-      data.fieldName = this.field.fieldName
-      data.fieldType = this.field.fieldType
-      data.fieldLength = this.field.fieldLength
-      data.fieldDecimalLength = this.field.fieldDecimalLength
-      data.fieldCanBeNull = this.field.fieldCanBeNull
-      data.fieldIsKey = this.field.fieldIsKey
-      data.fieldDescription = this.field.fieldDescription
-      this.form.fields.push(data)
-      this.closeAddDialog()
+      this.$refs.fieldForm.validate((valid) => {
+        if (valid) {
+          const data = {}
+          data.fieldName = this.field.fieldName
+          data.fieldType = this.field.fieldType
+          data.fieldLength = this.field.fieldLength
+          data.fieldDecimalLength = this.field.fieldDecimalLength
+          data.fieldCanBeNull = this.field.fieldCanBeNull
+          data.fieldIsKey = this.field.fieldIsKey
+          data.fieldDescription = this.field.fieldDescription
+          this.form.fields.push(data)
+          this.closeAddDialog()
+        } else {
+          return false
+        }
+      })
     },
     closeAddDialog() {
       this.showAddDialog = false
@@ -246,12 +303,19 @@ export default {
       }
     },
     onSubmit() {
-      generatorSql(this.form).then(response => {
-        if (response.code === 200) {
-          this.handleDownload('/dev-api/api/download?path=' + response.data, response.data, 'application/force-download')
+      this.$refs.form.validate((valid) => {
+        if (valid) {
+          generatorSql(this.form).then(response => {
+            if (response.code === 200) {
+              this.handleDownload('/dev-api/api/download?path=' + response.data, response.data, 'application/force-download')
+            } else {
+              this.$message.error(response.message)
+              return
+            }
+          })
+        } else {
+          return false
         }
-      }).catch(e => {
-        this.$message.error('生成SQL脚本失败，请稍后再试!')
       })
     },
     // 下载附件
