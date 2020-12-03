@@ -58,7 +58,7 @@
         <el-checkbox-group
           v-model="form.mapperNames">
           <el-checkbox  label="insertSelective">条件插入</el-checkbox>
-          <el-checkbox  label="insertBatchSelective">批量条件插入</el-checkbox>
+          <el-checkbox  label="insertBatch">批量插入</el-checkbox>
           <el-checkbox  label="deleteSelective">条件删除</el-checkbox>
           <el-checkbox  label="deleteBatchSelective">批量条件删除</el-checkbox>
           <el-checkbox  label="updateSelective">条件更新</el-checkbox>
