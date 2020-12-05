@@ -172,6 +172,10 @@ export default {
           generatorJava(this.form).then(res => {
             if (res.code === 200) {
               this.$message.success('success')
+              this.handleDownload('/dev-api/api/download?path=' + res.data, 'code.zip', 'application/force-download')
+            } else {
+              this.$message.error(res.message)
+              return
             }
           })
         } else {
