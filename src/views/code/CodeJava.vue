@@ -84,6 +84,8 @@ export default {
       if (this.form.isGeneratorController.indexOf(1) !== -1) {
         if (!value) {
           callback(new Error('请输入Controller类名'))
+        } else {
+          callback()
         }
       } else {
         callback()
@@ -93,6 +95,8 @@ export default {
       if (this.form.isGeneratorService.indexOf(1) !== -1) {
         if (!value) {
           callback(new Error('请输入Service类名'))
+        } else {
+          callback()
         }
       } else {
         callback()
