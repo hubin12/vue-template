@@ -160,20 +160,38 @@ export const asyncRoutes = [
     name: 'Code',
     meta: {
       title: '代码生成',
-      icon: 'form'
+      icon: 'code'
     },
     children: [
       {
         path: 'java',
         name: 'Java',
         component: () => import('@/views/code/CodeJava'),
-        meta: { title: 'Java代码生成', icon: 'form' }
+        meta: { title: 'Java代码生成', icon: 'codeJava' }
       },
       {
         path: 'sql',
         name: 'Sql',
         component: () => import('@/views/code/CodeSql'),
-        meta: { title: 'Sql脚本生成', icon: 'form' }
+        meta: { title: 'Sql脚本生成', icon: 'codeSql' }
+      }
+    ]
+  },
+  {
+    path: '/permission',
+    component: Layout,
+    redirect: '/permission/index',
+    name: 'permission',
+    meta: {
+      title: '权限管理',
+      icon: 'permission'
+    },
+    children: [
+      {
+        path: 'role',
+        name: 'role',
+        component: () => import('@/views/permission/index'),
+        meta: { title: '权限管理', icon: 'role', roles: ['admin'] }
       }
     ]
   },
