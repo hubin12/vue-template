@@ -41,6 +41,22 @@
         </span>
       </el-form-item>
 
+      <el-form-item prop="code">
+        <span class="svg-container">
+          <svg-icon icon-class="password" />
+        </span>
+        <el-input
+          ref="code"
+          v-model="loginForm.code"
+          placeholder="Code"
+          name="code"
+          type="text"
+          tabindex="3"
+          auto-complete="on"
+        />
+      </el-form-item>
+      <img :src="codeSrc" @click="getCode" style="height: 47px; margin-bottom: 20px;">
+
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
 
       <div class="tips">
@@ -54,8 +70,13 @@
 
 <script>
 
+import { code } from '@/api/user'
+
 export default {
   name: 'Login',
+  created() {
+    this.getCode()
+  },
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!value || value.length < 0) {
@@ -74,7 +95,8 @@ export default {
     return {
       loginForm: {
         username: 'root',
-        password: '123456'
+        password: '123456',
+        code: ''
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -82,7 +104,8 @@ export default {
       },
       loading: false,
       passwordType: 'password',
-      redirect: undefined
+      redirect: undefined,
+      codeSrc: ''
     }
   },
   watch: {
@@ -94,6 +117,13 @@ export default {
     }
   },
   methods: {
+    getCode() {
+      code().then(res => {
+        if (res.code === 200) {
+          this.codeSrc = 'data:image/png;base64,' + res.data
+        }
+      })
+    },
     showPwd() {
       if (this.passwordType === 'password') {
         this.passwordType = ''
